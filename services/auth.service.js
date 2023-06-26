@@ -1,0 +1,62 @@
+const boom = require('@hapi/boom');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+
+const { config } = require('./../config/config');
+
+const UserService = require('./user.service');
+const service = new UserService();
+
+class AuthService {
+
+    async getUser(email, password){
+        const user = await service.findByEmail(email);
+        if(!user){
+            throw boom.unauthorized();
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if(!isMatch){
+            throw boom.unauthorized();
+            }
+            delete user.dataValues.password;
+            return user;
+    }
+
+    signToken(user){
+        const payload = {
+        sub: user.id,
+        role: user.role
+    }
+      const token = jwt.sign(payload, config.jwtSecret);
+      return {
+        user,
+        token 
+      };
+    }
+
+    async sendMail(email){
+        const user = await service.findByEmail(email);
+        if(!user){
+            throw boom.unauthorized();
+        }
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: 'matheusangel534@gmail.com',
+                pass: 'ceiumglakdsmzjkm'
+          }
+        });
+        await transporter.sendMail({
+            from: 'matheusangel534@gmail.com', // sender address
+            to: `${user.email}`,
+            subject: "Probando correo", // Subject line
+            text: "Hola estimado usuario, este correo es para recuperar la contraseña olvidada del sitio web X creado con NODEJS", // plain text body
+            html: "<b>Hola estimado usuario, este correo es para recuperar la contraseña olvidada del sitio web X creado con NODEJS</b>", // html body
+        });
+        return { message: 'mail sent' };
+    }
+}
+module.exports = AuthService;
