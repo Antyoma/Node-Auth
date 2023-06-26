@@ -45,12 +45,12 @@ class AuthService {
             port: 465,
             secure: true,
             auth: {
-                user: 'matheusangel534@gmail.com',
-                pass: 'ceiumglakdsmzjkm'
+                user: config.smtpEmail,
+                pass: config.smtpPassword
           }
         });
         await transporter.sendMail({
-            from: 'matheusangel534@gmail.com', // sender address
+            from: config.smtpEmail, // sender address
             to: `${user.email}`,
             subject: "Probando correo", // Subject line
             text: "Hola estimado usuario, este correo es para recuperar la contraseña olvidada del sitio web X creado con NODEJS", // plain text body
