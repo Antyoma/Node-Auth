@@ -55,6 +55,8 @@ class AuthService {
         return rta;
     }
 
+    async changePassword()
+
     async sendMail(infoMail){
 
         const transporter = nodemailer.createTransport({
